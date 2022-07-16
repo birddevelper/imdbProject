@@ -1,5 +1,6 @@
 package mst.shr.imdb.imdbproject.services;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import mst.shr.imdb.imdbproject.models.dbModels.*;
 import mst.shr.imdb.imdbproject.repositories.MovieCastRepository;
 import mst.shr.imdb.imdbproject.repositories.MovieGenresRepository;
@@ -45,7 +46,7 @@ public class ImportServiceImpl implements ImportService {
      * @param uploadedFile   uploaded file
      */
     @Override
-    public void importDataset(MultipartFile uploadedFile) throws NumberFormatException, IOException, NoSuchAlgorithmException {
+    public void importDataset(MultipartFile uploadedFile) throws NumberFormatException, IOException, NoSuchAlgorithmException, InvalidFormatException {
         LineIterator iterator = null;
 
         File file = FileUtilities.saveUploadedFile(uploadedFile, "c:\\uploads", true);
@@ -55,23 +56,28 @@ public class ImportServiceImpl implements ImportService {
             String line = iterator.nextLine();
             String[] lineData = line.split("\t");
 
-            // Here the content of the uploaded file is checked to choose appropriate import method
-            // title.basic file
-            if (lineData[0].equals("tconst") && lineData[2].equals("primaryTitle") &&
-                    lineData[5].equals("startYear") && lineData[8].equals("genres")){
-                    this.importMovieDataset(file);
+            if (lineData.length>=3) {
+                // Here the content of the uploaded file is checked to choose appropriate import method
+                // title.basic file
+                if (lineData[0].equals("tconst") && lineData[2].equals("primaryTitle") &&
+                        lineData[5].equals("startYear") && lineData[8].equals("genres")){
+                        this.importMovieDataset(file);
+                }
+                // title.crew file
+                else if (lineData[0].equals("tconst") && lineData[1].equals("directors") && lineData[2].equals("writers")){
+                    this.importCrewDataset(file);
+                }
+                // title.principal file
+                else if (lineData[0].equals("tconst") && lineData[2].equals("nconst") && lineData[3].equals("category")){
+                    this.importPrincipalDataset(file);
+                }
+                // name.basic file
+                else if(lineData[0].equals("nconst") && lineData[1].equals("primaryName") && lineData[3].equals("deathYear")){
+                    this.importPersonsDataset(file);
+                }
             }
-            // title.crew file
-            else if (lineData[0].equals("tconst") && lineData[1].equals("directors") && lineData[2].equals("writers")){
-                this.importCrewDataset(file);
-            }
-            // title.principal file
-            else if (lineData[0].equals("tconst") && lineData[2].equals("nconst") && lineData[3].equals("category")){
-                this.importPrincipalDataset(file);
-            }
-            // name.basic file
-            else if(lineData[0].equals("nconst") && lineData[1].equals("primaryName") && lineData[3].equals("deathYear")){
-                this.importPersonsDataset(file);
+            else {
+                throw new InvalidFormatException();
             }
 
         }
