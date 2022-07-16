@@ -1,12 +1,10 @@
 package mst.shr.imdb.imdbproject.services;
 
-import mst.shr.imdb.imdbproject.models.dbModels.Movie;
-import mst.shr.imdb.imdbproject.models.dbModels.MovieCast;
-import mst.shr.imdb.imdbproject.models.dbModels.MovieGenres;
-import mst.shr.imdb.imdbproject.models.dbModels.Role;
+import mst.shr.imdb.imdbproject.models.dbModels.*;
 import mst.shr.imdb.imdbproject.repositories.MovieCastRepository;
 import mst.shr.imdb.imdbproject.repositories.MovieGenresRepository;
 import mst.shr.imdb.imdbproject.repositories.MovieRepository;
+import mst.shr.imdb.imdbproject.repositories.PersonRepository;
 import mst.shr.imdb.imdbproject.utilities.FileUtilities;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -30,11 +28,15 @@ public class ImportServiceImpl implements ImportService {
 
     private MovieGenresRepository movieGenresRepository;
 
+    private PersonRepository personRepository;
+
     @Autowired
-    public ImportServiceImpl(MovieRepository movieRepository, MovieCastRepository movieCastRepository, MovieGenresRepository movieGenresRepository) {
+    public ImportServiceImpl(MovieRepository movieRepository, MovieCastRepository movieCastRepository,
+                             MovieGenresRepository movieGenresRepository, PersonRepository personRepository) {
         this.movieRepository = movieRepository;
         this.movieCastRepository = movieCastRepository;
         this.movieGenresRepository = movieGenresRepository;
+        this.personRepository = personRepository;
     }
 
     /**
@@ -54,23 +56,29 @@ public class ImportServiceImpl implements ImportService {
             String[] lineData = line.split("\t");
 
             // Here the content of the uploaded file is checked to choose appropriate import method
-            // title.movie
+            // title.basic file
             if (lineData[0].equals("tconst") && lineData[2].equals("primaryTitle") &&
                     lineData[5].equals("startYear") && lineData[8].equals("genres")){
                     this.importMovieDataset(file);
             }
+            // title.crew file
             else if (lineData[0].equals("tconst") && lineData[1].equals("directors") && lineData[2].equals("writers")){
                 this.importCrewDataset(file);
             }
+            // title.principal file
             else if (lineData[0].equals("tconst") && lineData[2].equals("nconst") && lineData[3].equals("category")){
                 this.importPrincipalDataset(file);
+            }
+            // name.basic file
+            else if(lineData[0].equals("nconst") && lineData[1].equals("primaryName") && lineData[3].equals("deathYear")){
+                this.importPersonsDataset(file);
             }
 
         }
     }
 
     /**
-     * This method reads data from given title.basic tsv file and imports it into database
+     * This method reads data from given title.basic (movie's basic info) tsv file and imports it into database
      *
      * @param datasetFile   title's basic dataset file
      */
@@ -120,7 +128,7 @@ public class ImportServiceImpl implements ImportService {
 
 
     /**
-     * This method reads data from given title.crew tsv file and imports it into database
+     * This method reads data from given title.crew (director and writer of the movies) tsv file and imports it into database
      *
      * @param datasetFile  Movie's crew dataset file
      */
@@ -130,7 +138,7 @@ public class ImportServiceImpl implements ImportService {
         LineIterator iterator = null;
         try {
 
-            ArrayList<MovieCast> movieCasts = new ArrayList<>();
+            ArrayList<MovieCast> movieCastList = new ArrayList<>();
             iterator = FileUtils.lineIterator(datasetFile, "UTF-8");
             boolean firstLine = true;
             while (iterator.hasNext()) {
@@ -147,17 +155,17 @@ public class ImportServiceImpl implements ImportService {
                 if(!directorsField.equals("\\N")) {
                     String[] directorsList = directorsField.split(",");
                     for (String directorId : directorsList)
-                        movieCasts.add(new MovieCast(movieId, directorId, Role.DIRECTOR));
+                        movieCastList.add(new MovieCast(movieId, directorId, Role.DIRECTOR));
                 }
 
                 if (!writersField.equals("\\N")) {
                     String[] writersList = writersField.split(",");
                     for (String writerId : writersList)
-                        movieCasts.add(new MovieCast(movieId, writerId, Role.WRITER));
+                        movieCastList.add(new MovieCast(movieId, writerId, Role.WRITER));
                 }
             }
 
-            movieCastRepository.saveAll(movieCasts);
+            movieCastRepository.saveAll(movieCastList);
         }
         finally {
             if(iterator!=null)
@@ -166,9 +174,9 @@ public class ImportServiceImpl implements ImportService {
     }
 
     /**
-     * This method reads data from given title.crew tsv file and imports it into database
+     * This method reads data from given title.principal (people involved in making movie) tsv file and imports it into database
      *
-     * @param datasetFile  Movie's crew dataset file
+     * @param datasetFile  Movie's principal dataset file
      */
 
     private void importPrincipalDataset(File datasetFile) throws NumberFormatException, IOException {
@@ -176,7 +184,7 @@ public class ImportServiceImpl implements ImportService {
         LineIterator iterator = null;
         try {
 
-            ArrayList<MovieCast> movieCasts = new ArrayList<>();
+            ArrayList<MovieCast> movieCastList = new ArrayList<>();
             iterator = FileUtils.lineIterator(datasetFile, "UTF-8");
             boolean firstLine = true;
             while (iterator.hasNext()) {
@@ -190,12 +198,52 @@ public class ImportServiceImpl implements ImportService {
                 String category = lineData[3];
                 if (category.equals("actor") || category.equals("actress") ) {
                     String actor = lineData[2];
-                    movieCasts.add(new MovieCast(movieId, actor, Role.ACTOR));
+                    movieCastList.add(new MovieCast(movieId, actor, Role.ACTOR));
                 }
 
             }
 
-            movieCastRepository.saveAll(movieCasts);
+            movieCastRepository.saveAll(movieCastList);
+        }
+        finally {
+            if(iterator!=null)
+                LineIterator.closeQuietly(iterator);
+        }
+    }
+
+
+    /**
+     * This method reads data from given name.basic (person's basic info) tsv file and imports it into database
+     *
+     * @param datasetFile  person's crew dataset file
+     */
+
+    private void importPersonsDataset(File datasetFile) throws NumberFormatException, IOException {
+
+        LineIterator iterator = null;
+        try {
+
+            ArrayList<Person> personList = new ArrayList<>();
+            iterator = FileUtils.lineIterator(datasetFile, "UTF-8");
+            boolean firstLine = true;
+            while (iterator.hasNext()) {
+                String line = iterator.nextLine();
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+
+                // read data from the required fields
+                String[] lineData = line.split("\t");
+                String personId = lineData[0]; // Person's uniq Id
+                String personName = lineData[1]; // person's name
+                boolean isAlive = lineData[3].equals("\\N"); // If death year field is empty, he/she is alive
+
+                personList.add(new Person(personId, personName, isAlive));
+
+            }
+
+            personRepository.saveAll(personList);
         }
         finally {
             if(iterator!=null)

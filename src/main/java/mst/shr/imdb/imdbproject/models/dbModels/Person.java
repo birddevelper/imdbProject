@@ -20,5 +20,5 @@ public class Person {
     @Id
     private String id;
     private String name;
-    private boolean isAlive;
+    private boolean alive;
 }
