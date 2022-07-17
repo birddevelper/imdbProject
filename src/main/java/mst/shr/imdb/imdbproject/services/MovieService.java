@@ -1,11 +1,9 @@
 package mst.shr.imdb.imdbproject.services;
 
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import mst.shr.imdb.imdbproject.models.dbModels.Movie;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
 
 
 public interface MovieService {
@@ -16,6 +14,18 @@ public interface MovieService {
      * @param genres    The genres name
      * @return  Dictionary of the Year:Movie-title
      */
-    Dictionary<Integer,String> genresBestSellingMovies(String genres);
+    HashMap<Integer, Movie> getGenresBestSellingMovies(String genres);
+
+    /**
+     * This method returns list of movies in which both writer and director are same person an is alive
+     * @return  List of the Movies
+     */
+    List<Movie> getMoviesWithOneAlivePersonAsWriterAndDirector();
+
+    /**
+     * This method gets to person's name
+     * @return  List of the Movies
+     */
+    List<Movie> getCommonMoviesOfTwoActors(String actor1, String actor2);
 
 }

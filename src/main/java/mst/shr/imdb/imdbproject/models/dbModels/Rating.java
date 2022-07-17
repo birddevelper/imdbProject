@@ -1,26 +1,21 @@
 package mst.shr.imdb.imdbproject.models.dbModels;
 
-
 import lombok.*;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Entity(name="movie")
+@Entity(name="rating")
 @Getter
 @Setter
-public class Movie {
+public class Rating {
 
     @Id
-    private String id;
-    private String title;
-    private int releaseYear;
-
-
+    private String movieId;
+    private float averageRate;
+    private int votes;
 }

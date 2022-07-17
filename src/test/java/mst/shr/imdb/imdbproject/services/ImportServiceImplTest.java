@@ -1,10 +1,8 @@
 package mst.shr.imdb.imdbproject.services;
 
 import mst.shr.imdb.imdbproject.models.dbModels.MovieGenres;
-import mst.shr.imdb.imdbproject.repositories.MovieCastRepository;
-import mst.shr.imdb.imdbproject.repositories.MovieGenresRepository;
-import mst.shr.imdb.imdbproject.repositories.MovieRepository;
-import mst.shr.imdb.imdbproject.repositories.PersonRepository;
+import mst.shr.imdb.imdbproject.models.dbModels.Rating;
+import mst.shr.imdb.imdbproject.repositories.*;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +39,11 @@ class ImportServiceImplTest {
 
     @Resource
     private PersonRepository personRepository;
+
+    @Resource
+    private RatingRepository ratingRepository;
+
+
 
     @BeforeEach
     void setUp() {
@@ -118,6 +121,68 @@ class ImportServiceImplTest {
 
         assertEquals(2,personRepository.findByAliveEquals(true).size());
         assertEquals(5,personRepository.findByAliveEquals(false).size());
+    }
+
+    @Test
+    void importDatasetWhenTitleRatingsFileIsGiven() throws IOException, NoSuchAlgorithmException {
+        byte[] file = ("tconst\taverageRating\tnumVotes\n" +
+                "tt0000001\t5.7\t1893\n" +
+                "tt0000002\t5.9\t253\n" +
+                "tt0000003\t6.5\t1688\n" +
+                "tt0000004\t5.7\t166\n" +
+                "tt0000005\t6.2\t2504\n" +
+                "tt0000006\t5.1\t170\n" +
+                "tt0000007\t5.4\t783\n" +
+                "tt0000008\t5.4\t2032\n" +
+                "tt0000009\t5.3\t197\n" +
+                "tt0000010\t6.9\t6849\n").getBytes(StandardCharsets.UTF_8);
+
+        MultipartFile multipartFile = new MockMultipartFile("datasetFile.tsv", file);
+
+        importService.importDataset(multipartFile);
+
+        assertEquals(10,ratingRepository.findAll().size());
+    }
+
+    @Test
+    void importDatasetWhenInvalidColumnFormatIsGiven() throws IOException, NoSuchAlgorithmException {
+
+        byte[] file = ("titleId\tordering\ttitle\tregion\tlanguage\ttypes\tattributes\tisOriginalTitle\n" +
+                "tt0000001\t1\tКарменсіта\tUA\t\\N\timdbDisplay\t\\N\t0\n" +
+                "tt0000001\t2\tCarmencita\tDE\t\\N\t\\N\tliteral title\t0\n" +
+                "tt0000001\t3\tCarmencita - spanyol tánc\tHU\t\\N\timdbDisplay\t\\N\t0\n").getBytes(StandardCharsets.UTF_8);
+
+        MultipartFile multipartFile = new MockMultipartFile("datasetFile.tsv", file);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            importService.importDataset(multipartFile);
+        });
+
+        String expectedMessage = "Invalid file format";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+
+
+    }
+
+    @Test
+    void importDatasetWhenInvalidFileFormatIsGiven() throws IOException, NoSuchAlgorithmException {
+
+        byte[] file = ("Hi How are you").getBytes(StandardCharsets.UTF_8);
+
+        MultipartFile multipartFile = new MockMultipartFile("datasetFile.tsv", file);
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            importService.importDataset(multipartFile);
+        });
+
+        String expectedMessage = "Invalid file format";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+
+
     }
 
 }

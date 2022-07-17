@@ -1,11 +1,7 @@
 package mst.shr.imdb.imdbproject.services;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import mst.shr.imdb.imdbproject.models.dbModels.*;
-import mst.shr.imdb.imdbproject.repositories.MovieCastRepository;
-import mst.shr.imdb.imdbproject.repositories.MovieGenresRepository;
-import mst.shr.imdb.imdbproject.repositories.MovieRepository;
-import mst.shr.imdb.imdbproject.repositories.PersonRepository;
+import mst.shr.imdb.imdbproject.repositories.*;
 import mst.shr.imdb.imdbproject.utilities.FileUtilities;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -31,13 +27,16 @@ public class ImportServiceImpl implements ImportService {
 
     private PersonRepository personRepository;
 
+    private RatingRepository ratingRepository;
+
     @Autowired
     public ImportServiceImpl(MovieRepository movieRepository, MovieCastRepository movieCastRepository,
-                             MovieGenresRepository movieGenresRepository, PersonRepository personRepository) {
+                             MovieGenresRepository movieGenresRepository, PersonRepository personRepository, RatingRepository ratingRepository) {
         this.movieRepository = movieRepository;
         this.movieCastRepository = movieCastRepository;
         this.movieGenresRepository = movieGenresRepository;
         this.personRepository = personRepository;
+        this.ratingRepository = ratingRepository;
     }
 
     /**
@@ -46,7 +45,7 @@ public class ImportServiceImpl implements ImportService {
      * @param uploadedFile   uploaded file
      */
     @Override
-    public void importDataset(MultipartFile uploadedFile) throws NumberFormatException, IOException, NoSuchAlgorithmException, InvalidFormatException {
+    public void importDataset(MultipartFile uploadedFile) throws NumberFormatException, IOException, NoSuchAlgorithmException, IllegalArgumentException {
         LineIterator iterator = null;
 
         File file = FileUtilities.saveUploadedFile(uploadedFile, "c:\\uploads", true);
@@ -75,9 +74,15 @@ public class ImportServiceImpl implements ImportService {
                 else if(lineData[0].equals("nconst") && lineData[1].equals("primaryName") && lineData[3].equals("deathYear")){
                     this.importPersonsDataset(file);
                 }
+                else if (lineData[0].equals("tconst") && lineData[1].equals("averageRating") && lineData[2].equals("numVotes")){
+                    this.importRatingDataset(file);
+                }
+                else {
+                    throw new IllegalArgumentException("Invalid file format");
+                }
             }
             else {
-                throw new InvalidFormatException();
+                throw new IllegalArgumentException("Invalid file format");
             }
 
         }
@@ -109,9 +114,7 @@ public class ImportServiceImpl implements ImportService {
                 Movie movie = new Movie(
                         movieId, // uniq id of the movie
                         lineData[2], // primary title of the movie
-                        parseInt(lineData[5]), // release year of the movie
-                        0,      // rate of the movie
-                        0      // number of votes
+                        parseInt(lineData[5]) // release year of the movie
                 );
                 moviesList.add(movie);
 
@@ -250,6 +253,45 @@ public class ImportServiceImpl implements ImportService {
             }
 
             personRepository.saveAll(personList);
+        }
+        finally {
+            if(iterator!=null)
+                LineIterator.closeQuietly(iterator);
+        }
+    }
+
+    /**
+     * This method reads data from given title.rating (movie's rating data) tsv file and imports it into database
+     *
+     * @param datasetFile  Movie's rating dataset file
+     */
+
+    private void importRatingDataset(File datasetFile) throws NumberFormatException, IOException {
+
+        LineIterator iterator = null;
+        try {
+
+            ArrayList<Rating> RatingList = new ArrayList<>();
+            iterator = FileUtils.lineIterator(datasetFile, "UTF-8");
+            boolean firstLine = true;
+            while (iterator.hasNext()) {
+                String line = iterator.nextLine();
+                if (firstLine) {
+                    firstLine = false;
+                    continue;
+                }
+
+                // read data from the required fields
+                String[] lineData = line.split("\t");
+                String movieId = lineData[0]; // Person's uniq Id
+                float averageRating = Float.valueOf(lineData[1]); // average rating of the movie
+                int numberOfVotes = Integer.parseInt(lineData[2]); // number of votes
+
+                RatingList.add(new Rating(movieId, averageRating, numberOfVotes));
+
+            }
+
+            ratingRepository.saveAll(RatingList);
         }
         finally {
             if(iterator!=null)

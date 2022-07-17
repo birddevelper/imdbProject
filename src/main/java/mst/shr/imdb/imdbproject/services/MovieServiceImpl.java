@@ -1,22 +1,14 @@
 package mst.shr.imdb.imdbproject.services;
 
 import mst.shr.imdb.imdbproject.models.dbModels.Movie;
+import mst.shr.imdb.imdbproject.repositories.MovieCastRepository;
+import mst.shr.imdb.imdbproject.repositories.MovieGenresRepository;
 import mst.shr.imdb.imdbproject.repositories.MovieRepository;
-import mst.shr.imdb.imdbproject.utilities.FileUtilities;
-import org.apache.commons.io.LineIterator;
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.List;
-
-import static java.lang.Integer.*;
 
 @Service
 public class MovieServiceImpl implements MovieService{
@@ -24,12 +16,16 @@ public class MovieServiceImpl implements MovieService{
 
     private MovieRepository movieRepository;
 
+    private MovieCastRepository movieCastRepository;
+
+    private MovieGenresRepository movieGenresRepository;
+
     @Autowired
-    public MovieServiceImpl(MovieRepository movieRepository) {
+    public MovieServiceImpl(MovieRepository movieRepository, MovieCastRepository movieCastRepository, MovieGenresRepository movieGenresRepository) {
         this.movieRepository = movieRepository;
+        this.movieCastRepository = movieCastRepository;
+        this.movieGenresRepository = movieGenresRepository;
     }
-
-
 
 
     /**
@@ -39,13 +35,35 @@ public class MovieServiceImpl implements MovieService{
      * @return Dictionary of the Year:Movie-title
      */
     @Override
-    public Dictionary<Integer, String> genresBestSellingMovies(String genres) {
-        return null;
+    public HashMap<Integer, Movie> getGenresBestSellingMovies(String genres) {
+        List<Movie> movies  = movieRepository.findGenresBestSellings(genres);
+        HashMap<Integer,Movie> movieHashMap = new HashMap<>();
+        movies.forEach(movie -> movieHashMap.put(movie.getReleaseYear(),movie));
+
+        return movieHashMap;
+
     }
 
+    /**
+     * This method returns list of movies in which both writer and director are same person
+     *
+     * @return List of the Movies
+     */
+    @Override
+    public List<Movie> getMoviesWithOneAlivePersonAsWriterAndDirector() {
+        List<Movie> movies = movieRepository.findMoviesWithSameDirectorAndWriter();
+        return movies;
+    }
 
-
-
-
-
+    /**
+     * This method gets to person's name
+     *
+     * @param actor1
+     * @param actor2
+     * @return List of the Movies
+     */
+    @Override
+    public List<Movie> getCommonMoviesOfTwoActors(String actor1, String actor2) {
+        return null;
+    }
 }
