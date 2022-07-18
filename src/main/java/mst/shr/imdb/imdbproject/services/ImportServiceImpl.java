@@ -48,7 +48,7 @@ public class ImportServiceImpl implements ImportService {
     public void importDataset(MultipartFile uploadedFile) throws NumberFormatException, IOException, NoSuchAlgorithmException, IllegalArgumentException {
         LineIterator iterator = null;
 
-        File file = FileUtilities.saveUploadedFile(uploadedFile, "uploads", true);
+        File file = FileUtilities.saveUploadedFile(uploadedFile, "/opt/uploads", true);
         iterator = FileUtils.lineIterator(file, "UTF-8");
 
         if (iterator.hasNext()) {
