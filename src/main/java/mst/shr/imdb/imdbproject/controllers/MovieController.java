@@ -62,7 +62,7 @@ public class MovieController {
     }
 
 
-    @Operation(summary = "returns list of movies in which both writer and director are same person an alive")
+    @Operation(summary = "returns list of movies in which both writer and director are same person and alive")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Information successfully retrieved",
                     content = { @Content(mediaType = "application/json",
