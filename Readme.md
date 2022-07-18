@@ -1,4 +1,4 @@
-**Imdb database Services** is a sample tiny application that performs operations via Restful Webservices.
+**Imdb database Service** is a sample tiny application that performs operations via Restful Webservices.
 
 It exposes 5 endpoint as following list :
 
