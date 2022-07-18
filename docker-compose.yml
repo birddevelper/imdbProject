@@ -1,0 +1,15 @@
+version: '2.1'
+
+services:
+
+  #service for imdb project
+  imdbservice:
+    image: imdbservice-image
+    container_name: imdbservice
+    hostname: imdbservice-host
+    build :
+      context : ./
+      dockerfile: Dockerfile
+    ports:
+      - '8090:8090'
+    restart: always
