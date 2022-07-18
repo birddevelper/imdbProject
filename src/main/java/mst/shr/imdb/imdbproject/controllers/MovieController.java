@@ -33,6 +33,8 @@ public class MovieController {
     }
 
 
+    // - GET localhost:8090/api/queries/genresBestSellingMovies
+    // (Gets a genre name as a string and returns best-selling movie title on each year for that genre)
     @Operation(summary = "Gets a genre name as a string and returns best-selling movie title on each year for that genre")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Information successfully retrieved",
@@ -61,7 +63,8 @@ public class MovieController {
         return new ResponseEntity(apiResponseModel, HttpStatus.OK);
     }
 
-
+    // - GET localhost:8090/api/queries/moviesWithOneAlivePersonAsWriterAndDirector
+    // (returns list of movies in which both writer and director are same person and alive)
     @Operation(summary = "returns list of movies in which both writer and director are same person and alive")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Information successfully retrieved",
@@ -92,7 +95,8 @@ public class MovieController {
 
 
 
-
+    // - GET localhost:8090/api/queries/commonMoviesOfTwoActors
+    // (Gets two person uniq id and returns movies that both of them played in)
     @Operation(summary = "Gets two person's uniq id and returns movies that both of them played in")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Information successfully retrieved",

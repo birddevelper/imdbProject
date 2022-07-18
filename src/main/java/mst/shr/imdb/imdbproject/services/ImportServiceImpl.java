@@ -74,10 +74,12 @@ public class ImportServiceImpl implements ImportService {
                 else if(lineData[0].equals("nconst") && lineData[1].equals("primaryName") && lineData[3].equals("deathYear")){
                     this.importPersonsDataset(file);
                 }
+                // title.rating file
                 else if (lineData[0].equals("tconst") && lineData[1].equals("averageRating") && lineData[2].equals("numVotes")){
                     this.importRatingDataset(file);
                 }
                 else {
+                    // if none of above structures found, throw IllegalArgumentException
                     throw new IllegalArgumentException("Invalid columns format");
                 }
             }
@@ -105,6 +107,8 @@ public class ImportServiceImpl implements ImportService {
             boolean firstLine = true;
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
+
+                // if it's first row (header row), skip it
                 if (firstLine) {
                     firstLine = false;
                     continue;
@@ -155,21 +159,25 @@ public class ImportServiceImpl implements ImportService {
             boolean firstLine = true;
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
+
+                // if it's first row (header row), skip it
                 if (firstLine) {
                     firstLine = false;
                     continue;
                 }
                 String[] lineData = line.split("\t");
-                String movieId = lineData[0];
-                String directorsField = lineData[1];
-                String writersField = lineData[2];
+                String movieId = lineData[0];  // movie unique id
+                String directorsField = lineData[1]; // directors uniq id seperated by comma
+                String writersField = lineData[2];  // writers uniq id seperated by comma
 
+                // if director exists, add it to collection
                 if(!directorsField.equals("\\N")) {
                     String[] directorsList = directorsField.split(",");
                     for (String directorId : directorsList)
                         movieCastList.add(new MovieCast(movieId, directorId, Role.DIRECTOR));
                 }
 
+                // if writer exists, add it to collection
                 if (!writersField.equals("\\N")) {
                     String[] writersList = writersField.split(",");
                     for (String writerId : writersList)
@@ -177,6 +185,7 @@ public class ImportServiceImpl implements ImportService {
                 }
             }
 
+            // persist the collection of movies
             movieCastRepository.saveAll(movieCastList);
         }
         finally {
@@ -201,13 +210,17 @@ public class ImportServiceImpl implements ImportService {
             boolean firstLine = true;
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
+
+                // if it's first row (header row), skip it
                 if (firstLine) {
                     firstLine = false;
                     continue;
                 }
                 String[] lineData = line.split("\t");
-                String movieId = lineData[0];
-                String category = lineData[3];
+                String movieId = lineData[0]; // movie unique id
+                String category = lineData[3]; // person role in the movie
+
+                // if person is actor or actress add it to collection
                 if (category.equals("actor") || category.equals("actress") ) {
                     String actor = lineData[2];
                     movieCastList.add(new MovieCast(movieId, actor, Role.ACTOR));
@@ -215,6 +228,7 @@ public class ImportServiceImpl implements ImportService {
 
             }
 
+            // persist the movieCastList items
             movieCastRepository.saveAll(movieCastList);
         }
         finally {
@@ -240,6 +254,8 @@ public class ImportServiceImpl implements ImportService {
             boolean firstLine = true;
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
+
+                // if it's first row (header row), skip it
                 if (firstLine) {
                     firstLine = false;
                     continue;
@@ -254,7 +270,7 @@ public class ImportServiceImpl implements ImportService {
                 personList.add(new Person(personId, personName, isAlive));
 
             }
-
+            // persist the personList items
             personRepository.saveAll(personList);
         }
         finally {
@@ -279,6 +295,8 @@ public class ImportServiceImpl implements ImportService {
             boolean firstLine = true;
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
+
+                // if it's first row (header row), skip it
                 if (firstLine) {
                     firstLine = false;
                     continue;
@@ -294,6 +312,7 @@ public class ImportServiceImpl implements ImportService {
 
             }
 
+            // persist the RatingList items
             ratingRepository.saveAll(RatingList);
         }
         finally {
