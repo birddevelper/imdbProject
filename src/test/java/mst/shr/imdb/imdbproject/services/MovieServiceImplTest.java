@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -58,5 +59,27 @@ class MovieServiceImplTest {
 
        assertEquals("Movie7",movieHashMap.get(1980).getTitle());
        assertEquals("M8",movieHashMap.get(2000).getTitle());
+    }
+
+    @Test
+    void getMoviesWithOneAlivePersonAsWriterAndDirector() {
+
+        List<Movie> movieList =  movieService.getMoviesWithOneAlivePersonAsWriterAndDirector();
+        assertEquals("2",movieList.get(0).getId());
+    }
+
+    @Test
+    void getCommonMoviesOfTwoActorsWhenTheyHaveCommonMovie(){
+
+        List<Movie> movieList = movieService.getCommonMoviesOfTwoActors("3","4");
+        assertEquals("1",movieList.get(0).getId());
+
+    }
+
+    @Test
+    void getCommonMoviesOfTwoActorsWhenTheyHaveNoCommonMovie(){
+
+        List<Movie> movieList = movieService.getCommonMoviesOfTwoActors("3","1");
+        assertEquals(0,movieList.size());
     }
 }

@@ -53,7 +53,7 @@ class ImportServiceImplTest {
     void importDatasetWhenTitleBasicFileIsGiven() throws IOException, NoSuchAlgorithmException {
         byte[] file = ("tconst\titleType\tprimaryTitle\toriginalTitle\tisAdult\tstartYear\tendYear\truntimeMinutes\tgenres\n" +
                 "tt0000001\tshort\tCarmencita\tCarmencita\t0\t1894\t\\N\t1\tDocumentary,Short\n" +
-                "tt0000002\tshort\tLe clown et ses chiens\tLe clown et ses chiens\t0\t1892\t\\N\t5\tAnimation,Short").getBytes(StandardCharsets.UTF_8);
+                "tt0000002\tshort\tLe clown et ses chiens\tLe clown et ses chiens\t0\tNovember 7, 1892\t\\N\t5\tAnimation,Short").getBytes(StandardCharsets.UTF_8);
 
         MultipartFile multipartFile = new MockMultipartFile("datasetFile.tsv", file);
 
@@ -158,7 +158,7 @@ class ImportServiceImplTest {
             importService.importDataset(multipartFile);
         });
 
-        String expectedMessage = "Invalid file format";
+        String expectedMessage = "Invalid columns format";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
