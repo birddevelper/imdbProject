@@ -27,7 +27,7 @@ public class ImportController {
         this.importService = importService;
     }
 
-    @PostMapping( produces = { "application/json" }, consumes = { "multipart/form-data" })
+    @PostMapping( value = "/import", produces = { "application/json" }, consumes = { "multipart/form-data" })
     public ResponseEntity<ApiResponseModel<String>> importDataset(@Parameter(description = "Dataset file") MultipartFile file ) throws IOException, NoSuchAlgorithmException {
 
         importService.importDataset(file);
