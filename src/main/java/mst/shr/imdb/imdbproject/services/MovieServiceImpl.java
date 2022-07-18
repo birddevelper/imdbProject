@@ -52,6 +52,7 @@ public class MovieServiceImpl implements MovieService{
     @Override
     public List<Movie> getMoviesWithOneAlivePersonAsWriterAndDirector() {
         List<Movie> movies = movieRepository.findMoviesWithSameDirectorAndWriter();
+
         return movies;
     }
 
@@ -64,6 +65,8 @@ public class MovieServiceImpl implements MovieService{
      */
     @Override
     public List<Movie> getCommonMoviesOfTwoActors(String actor1, String actor2) {
-        return null;
+
+        List<Movie> movieList = movieRepository.findCommonMoviesOfTwoActors(actor1, actor2);
+        return movieList;
     }
 }

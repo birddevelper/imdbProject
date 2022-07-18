@@ -48,7 +48,7 @@ public class ImportServiceImpl implements ImportService {
     public void importDataset(MultipartFile uploadedFile) throws NumberFormatException, IOException, NoSuchAlgorithmException, IllegalArgumentException {
         LineIterator iterator = null;
 
-        File file = FileUtilities.saveUploadedFile(uploadedFile, "c:\\uploads", true);
+        File file = FileUtilities.saveUploadedFile(uploadedFile, "uploads", true);
         iterator = FileUtils.lineIterator(file, "UTF-8");
 
         if (iterator.hasNext()) {
@@ -78,7 +78,7 @@ public class ImportServiceImpl implements ImportService {
                     this.importRatingDataset(file);
                 }
                 else {
-                    throw new IllegalArgumentException("Invalid file format");
+                    throw new IllegalArgumentException("Invalid columns format");
                 }
             }
             else {
@@ -111,10 +111,13 @@ public class ImportServiceImpl implements ImportService {
                 }
                 String[] lineData = line.split("\t");
                 String movieId = lineData[0];
+                String releaseYear = "0";
+                if(!lineData[5].equals("\\N"))
+                    releaseYear = lineData[5].contains(",") ? lineData[5].split(",")[1].trim() : lineData[5].trim();
                 Movie movie = new Movie(
                         movieId, // uniq id of the movie
                         lineData[2], // primary title of the movie
-                        parseInt(lineData[5]) // release year of the movie
+                        parseInt(releaseYear) // release year of the movie
                 );
                 moviesList.add(movie);
 

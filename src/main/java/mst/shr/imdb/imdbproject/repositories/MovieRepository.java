@@ -15,12 +15,12 @@ public interface MovieRepository extends JpaRepository<Movie,String> {
     @Query(nativeQuery = true,
             value = "SELECT movie.* FROM " +
                     "(SELECT movie_id, person_id FROM movie_cast WHERE role = 0) tbl_director " +
-                    "INNER JOIN (SELECT movie_id, person_id FROM movie_cast WHERE role = 1) tbl_writer" +
+                    "INNER JOIN (SELECT movie_id, person_id FROM movie_cast WHERE role = 1) tbl_writer " +
                     "ON (tbl_director.movie_id = tbl_writer.movie_id AND " +
-                    "tbl_director.person_id = tbl_writer.person_id )" +
+                    "tbl_director.person_id = tbl_writer.person_id ) " +
                     "INNER JOIN movie ON (tbl_director.movie_id = movie.id) " +
-                    "INNER JOIN person ON (tbl_writer.person_id = person.id)" +
-                    "WHERE person.alive = 1")
+                    "INNER JOIN person ON (tbl_writer.person_id = person.id) " +
+                    "WHERE person.alive = true")
     List<Movie> findMoviesWithSameDirectorAndWriter();
 
 
@@ -39,5 +39,17 @@ public interface MovieRepository extends JpaRepository<Movie,String> {
                     "ON ( movie.`release_year` = max_rate_movie.`release_year` AND rating.average_rate = max_rate_movie.mxrt ) " +
                     "ORDER BY movie.`release_year` ASC")
     List<Movie> findGenresBestSellings(@Param("genresName") String genres);
+
+
+
+    @Query(nativeQuery = true,
+            value ="SELECT movie.* FROM " +
+                    "(SELECT movie_id, person_id FROM movie_cast WHERE role = 2 and person_id = :actor1) tbl_actor1 " +
+                    "INNER JOIN (SELECT movie_id, person_id FROM movie_cast WHERE role = 2 and person_id = :actor2) tbl_actor2 " +
+                    "ON (tbl_actor1.movie_id = tbl_actor2.movie_id) " +
+                    "INNER JOIN movie ON (tbl_actor2.movie_id = movie.id)"
+    )
+    List<Movie> findCommonMoviesOfTwoActors(@Param("actor1") String actor1, @Param("actor2") String actor2);
+
 
 }

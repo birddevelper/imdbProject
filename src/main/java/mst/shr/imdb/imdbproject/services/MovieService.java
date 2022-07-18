@@ -23,7 +23,7 @@ public interface MovieService {
     List<Movie> getMoviesWithOneAlivePersonAsWriterAndDirector();
 
     /**
-     * This method gets to person's name
+     * This method gets two person's uniq id and returns movies that both of them played in
      * @return  List of the Movies
      */
     List<Movie> getCommonMoviesOfTwoActors(String actor1, String actor2);
