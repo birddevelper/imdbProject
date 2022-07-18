@@ -6,7 +6,7 @@ It exposes 5 endpoint as following list :
 
 - GET localhost:8090/api/queries/genresBestSellingMovies (Gets a genre name as a string and returns best-selling movie title on each year for that genre)
 - GET localhost:8090/api/queries/moviesWithOneAlivePersonAsWriterAndDirector (returns list of movies in which both writer and director are same person and alive)
-- GET localhost:8090/api/queries/commonMoviesOfTwoActors (Gets two person's uniq id and returns movies that both of them played in)
+- GET localhost:8090/api/queries/commonMoviesOfTwoActors (Gets two persons unique id and returns movies that both of them played in)
 - POST localhost:8090/api/db/import (open a new account, and returns the account number)
 - GET localhost:8090/actuator/metrics/http.server.requests?tag=uri:endpoint_address {example : api/db/import} (endpoint metrics such as request count)
 
