@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MovieServiceImplTest {
 
     @Resource
-    MovieServiceImpl movieService;
+    private MovieServiceImpl movieService;
 
     @Resource
     private MovieRepository movieRepository;
@@ -45,11 +45,6 @@ class MovieServiceImplTest {
 
     @Resource
     private RatingRepository ratingRepository;
-
-    @BeforeAll
-    static void beforeAll() {
-
-    }
 
 
 
