@@ -2,7 +2,7 @@
 
 It exposes 5 endpoint as following list as follows :
 
-imdb Service :
+imdb Service 
 
 - GET localhost:8090/api/queries/genresBestSellingMovies (Gets a genre name as a string and returns best-selling movie title on each year for that genre)
 - GET localhost:8090/api/queries/moviesWithOneAlivePersonAsWriterAndDirector (returns list of movies in which both writer and director are same person and alive)
