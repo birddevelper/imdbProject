@@ -12,7 +12,7 @@ imdb Service
 
 
 
-## How to setup
+## How to setup the application
 It is a docker based application. Running below command in project's directory builds single running container:
 
 ```bash
